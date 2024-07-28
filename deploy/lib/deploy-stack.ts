@@ -1,16 +1,28 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
-export class DeployStack extends cdk.Stack {
+export class CartStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    const cartModule = new lambda.Function(this, 'cartModuleLambda', {
+      runtime: lambda.Runtime.NODEJS_16_X,
+      code: lambda.Code.fromAsset('../dist/'),
+      handler: 'main.handler',
+      // environment: environmentConsts,
+    });
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'DeployQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    const api = new apigateway.LambdaRestApi(this, 'cartModuleAPI', {
+      handler: cartModule,
+      proxy: true,
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
+      },
+    });
   }
 }
