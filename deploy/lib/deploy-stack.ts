@@ -15,14 +15,17 @@ export class CartStack extends cdk.Stack {
       // environment: environmentConsts,
     });
 
-    const api = new apigateway.LambdaRestApi(this, 'cartModuleAPI', {
-      handler: cartModule,
-      proxy: true,
+    const api = new apigateway.RestApi(this, 'cartModuleAPI', {
+      // handler: cartModule,
+      // proxy: true,
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
         allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
       },
     });
+
+    const proxyResource = api.root.addResource('{proxy+}');
+    proxyResource.addMethod('ANY', new apigateway.LambdaIntegration(cartModule));
   }
 }
