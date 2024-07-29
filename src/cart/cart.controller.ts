@@ -6,6 +6,7 @@ import { AppRequest, getUserIdFromRequest } from '../shared';
 
 import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
+import { USER_ID } from 'src/constants';
 
 @Controller('api/profile/cart')
 export class CartController {
@@ -18,12 +19,13 @@ export class CartController {
   // @UseGuards(BasicAuthGuard)
   @Get()
   findUserCart(@Req() req: AppRequest) {
-    const cart = this.cartService.findOrCreateByUserId(getUserIdFromRequest(req));
+    const cart = this.cartService.findOrCreateByUserId(USER_ID);
 
     return {
       statusCode: HttpStatus.OK,
       message: 'OK',
-      data: { cart, total: calculateCartTotal(cart) },
+      cart,
+      total: calculateCartTotal(cart),
     }
   }
 
@@ -31,15 +33,13 @@ export class CartController {
   // @UseGuards(BasicAuthGuard)
   @Put()
   updateUserCart(@Req() req: AppRequest, @Body() body) { // TODO: validate body payload...
-    const cart = this.cartService.updateByUserId(getUserIdFromRequest(req), body)
+    const cart = this.cartService.updateByUserId(USER_ID, body)
 
     return {
       statusCode: HttpStatus.OK,
       message: 'OK',
-      data: {
-        cart,
-        total: calculateCartTotal(cart),
-      }
+      cart,
+      total: calculateCartTotal(cart),
     }
   }
 
@@ -47,7 +47,7 @@ export class CartController {
   // @UseGuards(BasicAuthGuard)
   @Delete()
   clearUserCart(@Req() req: AppRequest) {
-    this.cartService.removeByUserId(getUserIdFromRequest(req));
+    this.cartService.removeByUserId(USER_ID);
 
     return {
       statusCode: HttpStatus.OK,

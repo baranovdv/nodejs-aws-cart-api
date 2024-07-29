@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { v4 } from 'uuid';
 
-import { Cart } from '../models';
+import { Cart, CartItem } from '../models';
 
 @Injectable()
 export class CartService {
@@ -34,13 +34,28 @@ export class CartService {
     return this.createByUserId(userId);
   }
 
-  updateByUserId(userId: string, { items }: Cart): Cart {
+  updateByUserId(userId: string, cartItem: CartItem): Cart {
     const { id, ...rest } = this.findOrCreateByUserId(userId);
+
+    const items = rest.items || [];
+    const idOfDuplicate = items.findIndex(item => item.product.id === cartItem.product.id)
+
+    if (idOfDuplicate >= 0) {
+      if (cartItem.count === 0) {
+        items.splice(idOfDuplicate, 1)
+      } else {
+        items[idOfDuplicate] = cartItem;
+      }
+    } else {
+      items.push(cartItem)
+    }
+
+
 
     const updatedCart = {
       id,
       ...rest,
-      items: [ ...items ],
+      items: items,
     }
 
     this.userCarts[ userId ] = { ...updatedCart };
