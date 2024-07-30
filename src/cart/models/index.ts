@@ -1,35 +1,41 @@
-enum CartStatuses {
+export enum CartStatuses {
   OPEN = 'OPEN',
-  STATUS = 'STATUS'
+  ORDERED = 'ORDERED',
 }
 
 export type Product = {
-  id: string,
-  title: string,
-  description: string,
-  price: number,
+  id: string;
+  title: string;
+  description: string;
+  price: number;
 };
 
-
 export type CartItem = {
-  product: Product,
-  count: number,
-}
+  product_id: string;
+  count: number;
+  price: number;
+};
+
+export type CartItemReq = {
+  product: Product;
+  count: number;
+  price: number;
+};
 
 export type Cart = {
-  id: string,
-  user_id?: string,
-  created_at?: string,
-  updated_at?: string,
-  status?: CartStatuses,
-  items: CartItem[],
-}
+  id: string;
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
+  status?: CartStatuses;
+  items: CartItem[];
+};
 
 // const test_cart: Cart = {
 //   "id": "a0be6e86-841f-4c45-a47d-53af3a766f27",
 //   "user_id": "c6154b4a-ca44-489b-9eb2-71529b25aa30",
 //   "status": "OPEN",
-//   "items": 
+//   "items":
 //   [
 //     {
 //       "product": {
