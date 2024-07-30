@@ -1,23 +1,21 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { CartEntity } from './cart.entity';
 
-@Entity()
+@Entity('cart_items')
 export class CartItemEntity {
   @PrimaryGeneratedColumn('uuid')
-  cart_id: number;
+  id: string;
 
-  @Column({ type: 'uuid' })
+  @ManyToOne(() => CartEntity, cart => cart.items)
+  @JoinColumn({ name: 'cart_id' })
+  cart: CartEntity;
+
+  @Column('uuid')
   product_id: string;
 
-  @Column({ type: 'int' })
-  count: number;
-
-  @Column({ type: 'int' })
+  @Column('int')
   price: number;
 
-  @ManyToOne(() => CartEntity, (cart) => cart.items, {
-    eager: true,
-    cascade: true,
-  })
-  cart: CartEntity;
+  @Column('int')
+  count: number;
 }

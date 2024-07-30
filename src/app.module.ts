@@ -18,12 +18,16 @@ const ormConfig: DataSourceOptions = {
   password: '385920er!',
   database: 'postgres',
   entities: [CartEntity, CartItemEntity],
-  synchronize: true,
+  // synchronize: true,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 };
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(ormConfig),
+    TypeOrmModule.forFeature([CartEntity, CartItemEntity]),
     AuthModule,
     CartModule,
     OrderModule,

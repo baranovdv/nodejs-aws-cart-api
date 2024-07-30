@@ -20,11 +20,18 @@ export class CartService {
   private userCarts: Record<string, Cart> = {};
 
   async findByUserId(userId: string): Promise<Cart> {
-    const cart = await this.cartRepository.findOneBy({
-      user_id: userId,
+    const products = await this.cartRepository.find({
+      where: { user_id: userId },
+      relations: ['items'],
     });
 
-    return { id: cart.id, items: cart.items };
+    const items = products.reduce((acc, prod) => {
+      acc.push(...prod.items);
+
+      return acc;
+    }, []);
+
+    return { id: userId, items: items };
   }
 
   async createByUserId(userId: string) {
@@ -34,8 +41,8 @@ export class CartService {
       id,
       user_id: userId,
       items: [],
-      createdAt: date,
-      updatedAt: date,
+      created_at: date,
+      updated_at: date,
       status: CartStatuses.OPEN,
     });
 
@@ -63,22 +70,35 @@ export class CartService {
       (item) => item.product_id === cartItem.product.id,
     );
 
+    const parsedPrice = +cartItem.price;
+
     if (itemIndex > -1) {
       items.splice(itemIndex, 1, {
+        id: items[itemIndex].id,
+        cart_id: items[itemIndex].cart_id,
         product_id: cartItem.product.id,
         count: cartItem.count,
-        price: cartItem.product.price,
+        price: parsedPrice,
       });
     } else {
       items.push({
+        id: cartItem.product.id,
+        cart_id: id,
         product_id: cartItem.product.id,
         count: cartItem.count,
-        price: cartItem.price
+        price: parsedPrice,
       });
     }
 
     const date = new Date().toISOString();
-    const updatedCart = { id, ...rest, items: items, updated_at: date };
+    const updatedCart = {
+      id,
+      status: rest.status,
+      user_id: userId,
+      items: items,
+      updated_at: date,
+      created_at: date,
+    };
 
     await this.cartRepository.save(updatedCart);
 

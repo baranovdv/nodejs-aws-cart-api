@@ -9,7 +9,9 @@ CREATE TABLE carts (
 );
 
 CREATE TABLE cart_items (
+    id UUID PRIMARY KEY,
     cart_id UUID REFERENCES carts(id),
     product_id UUID,
+    price INTEGER,
     count INTEGER
 );

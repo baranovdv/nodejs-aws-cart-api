@@ -1,3 +1,5 @@
+import { CartItemEntity } from 'src/db/entities/cartItem.entity';
+
 export enum CartStatuses {
   OPEN = 'OPEN',
   ORDERED = 'ORDERED',
@@ -11,6 +13,8 @@ export type Product = {
 };
 
 export type CartItem = {
+  id?: string;
+  cart_id?: string;
   product_id: string;
   count: number;
   price: number;
@@ -19,7 +23,7 @@ export type CartItem = {
 export type CartItemReq = {
   product: Product;
   count: number;
-  price: number;
+  price: string;
 };
 
 export type Cart = {

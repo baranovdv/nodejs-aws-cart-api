@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { CartItemEntity } from './cartItem.entity';
 
-@Entity()
+@Entity('carts')
 export class CartEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -24,10 +24,10 @@ export class CartEntity {
   status: CartStatuses;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
 
   @OneToMany(() => CartItemEntity, (cartItem) => cartItem.cart, {
     eager: true,
