@@ -12,10 +12,10 @@ import { DataSourceOptions } from 'typeorm';
 
 const ormConfig: DataSourceOptions = {
   type: 'postgres',
-  host: 'database-cart.crym86aeeuit.ap-southeast-2.rds.amazonaws.com',
+  host: 'xxx',
   port: 5432,
   username: 'postgres',
-  password: '385920er!',
+  password: 'xxx!',
   database: 'postgres',
   entities: [CartEntity, CartItemEntity],
   // synchronize: true,
