@@ -2,11 +2,13 @@ import { Injectable } from '@nestjs/common';
 
 import { v4 } from 'uuid';
 
-import { Cart, CartItem, CartItemReq, CartStatuses } from '../models';
+import { Cart, CartStatuses } from '../models';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartEntity } from 'src/db/entities/cart.entity';
 import { Repository } from 'typeorm';
 import { CartItemEntity } from 'src/db/entities/cartItem.entity';
+import { UpdateCartDto } from '../dto/update-cart.dto';
+import { ProductEntity } from 'src/db/entities/product.entity';
 
 @Injectable()
 export class CartService {
@@ -15,34 +17,37 @@ export class CartService {
     private cartRepository: Repository<CartEntity>,
     @InjectRepository(CartItemEntity)
     private cartItemRepository: Repository<CartItemEntity>,
+    @InjectRepository(ProductEntity)
+    private productRepository: Repository<ProductEntity>,
   ) {}
 
   private userCarts: Record<string, Cart> = {};
 
   async findByUserId(userId: string): Promise<Cart> {
-    const products = await this.cartRepository.find({
-      where: { user_id: userId },
-      relations: ['items'],
+    const cart = await this.cartRepository.find({
+      where: { user: { id: userId } },
+      relations: {
+        items: {
+          product: true,
+        },
+      },
     });
 
-    const items = products.reduce((acc, prod) => {
+    const items = cart.reduce((acc, prod) => {
       acc.push(...prod.items);
 
       return acc;
     }, []);
 
-    return { id: userId, items: items };
+    return { id: cart[0].id, items: items };
   }
 
   async createByUserId(userId: string) {
     const id = v4();
-    const date = new Date().toISOString();
     const userCart = this.cartRepository.create({
       id,
-      user_id: userId,
+      user: { id: userId },
       items: [],
-      created_at: date,
-      updated_at: date,
       status: CartStatuses.OPEN,
     });
 
@@ -61,46 +66,53 @@ export class CartService {
     return this.createByUserId(userId);
   }
 
-  async updateByUserId(userId: string, cartItem: CartItemReq): Promise<Cart> {
-    const { id, ...rest } = await this.findOrCreateByUserId(userId);
+  async updateByUserId(userId: string, cartItem: UpdateCartDto): Promise<Cart> {
+    const cart = await this.findOrCreateByUserId(userId);
 
-    const items = rest.items;
-
-    const itemIndex = items.findIndex(
-      (item) => item.product_id === cartItem.product.id,
-    );
-
-    const parsedPrice = +cartItem.price;
-
-    if (itemIndex > -1) {
-      items.splice(itemIndex, 1, {
-        id: items[itemIndex].id,
-        cart_id: items[itemIndex].cart_id,
-        product_id: cartItem.product.id,
-        count: cartItem.count,
-        price: parsedPrice,
-      });
-    } else {
-      items.push({
+    const cartItemDB = await this.cartItemRepository.findOneBy({
+      product: {
         id: cartItem.product.id,
-        cart_id: id,
-        product_id: cartItem.product.id,
+      },
+    });
+
+    if (!cartItemDB) {
+      const productDB = await this.productRepository.findOneBy({
+        id: cartItem.product.id,
+      });
+
+      if (!productDB) {
+        await this.productRepository.insert(cartItem.product);
+      }
+
+      const id = v4();
+
+      await this.cartItemRepository.insert({
+        id: id,
+        cart: cart,
+        product: cartItem.product,
         count: cartItem.count,
-        price: parsedPrice,
       });
     }
 
-    const date = new Date().toISOString();
-    const updatedCart = {
-      id,
-      status: rest.status,
-      user_id: userId,
-      items: items,
-      updated_at: date,
-      created_at: date,
-    };
+    if (cartItemDB) {
+      if (cartItem.count === 0) {
+        await this.cartItemRepository.delete({ id: cartItemDB.id });
+      } else {
+        await this.cartItemRepository.update(
+          { id: cartItemDB.id },
+          { count: cartItem.count },
+        );
+      }
+    }
 
-    await this.cartRepository.save(updatedCart);
+    const updatedCart = await this.cartRepository.findOne({
+      where: { user: { id: userId } },
+      relations: {
+        items: {
+          product: true,
+        },
+      },
+    });
 
     return updatedCart;
   }

@@ -2,20 +2,24 @@ import { CartStatuses } from 'src/cart';
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  PrimaryColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { CartItemEntity } from './cartItem.entity';
+import { UserEntity } from './user.entity';
 
 @Entity('carts')
 export class CartEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string;
 
-  @Column()
-  user_id: string;
+  @ManyToOne(() => UserEntity, (user) => user.carts)
+  @JoinColumn({ name: 'user_id' }) 
+  user: UserEntity;
 
   @Column({
     type: 'enum',

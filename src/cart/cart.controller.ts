@@ -7,6 +7,7 @@ import { AppRequest, getUserIdFromRequest } from '../shared';
 import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
 import { USER_ID } from 'src/constants';
+import { UpdateCartDto } from './dto/update-cart.dto';
 
 @Controller('api/profile/cart')
 export class CartController {
@@ -32,7 +33,7 @@ export class CartController {
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
   @Put()
-  async updateUserCart(@Req() req: AppRequest, @Body() body) { // TODO: validate body payload...
+  async updateUserCart(@Req() req: AppRequest, @Body() body: UpdateCartDto) { // TODO: validate body payload...
     const cart = await this.cartService.updateByUserId(USER_ID, body)
 
     return {
