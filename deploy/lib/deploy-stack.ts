@@ -2,8 +2,9 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import { config } from "dotenv";
 
+config();
 export class CartStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -12,7 +13,11 @@ export class CartStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_16_X,
       code: lambda.Code.fromAsset('../dist/'),
       handler: 'main.handler',
-      // environment: environmentConsts,
+      environment: {
+        HOST: process.env.HOST || '',
+        USERNAME: process.env.USERNAME || '',
+        PASSWORD: process.env.PASSWORD || '',
+      },
     });
 
     const api = new apigateway.RestApi(this, 'cartModuleAPI', {

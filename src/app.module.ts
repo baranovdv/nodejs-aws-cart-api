@@ -12,13 +12,16 @@ import { DataSourceOptions } from 'typeorm';
 import { UserEntity } from './db/entities/user.entity';
 import { ProductEntity } from './db/entities/product.entity';
 import { OrderEntity } from './db/entities/order.entity';
+import { config } from "dotenv";
+
+config();
 
 const ormConfig: DataSourceOptions = {
   type: 'postgres',
-  host: 'database-cart.crym86aeeuit.ap-southeast-2.rds.amazonaws.com',
+  host: process.env.HOST || '',
   port: 5432,
-  username: 'postgres',
-  password: '784939oi!',
+  username: process.env.USERNAME || '',
+  password: process.env.PASSWORD || '',
   database: 'postgres',
   entities: [UserEntity, CartEntity, CartItemEntity, ProductEntity, OrderEntity],
   // synchronize: true,
@@ -30,7 +33,6 @@ const ormConfig: DataSourceOptions = {
 @Module({
   imports: [
     TypeOrmModule.forRoot(ormConfig),
-    // TypeOrmModule.forFeature([UserEntity, CartEntity, CartItemEntity, ProductEntity, OrderEntity]),
     AuthModule,
     CartModule,
     OrderModule,
