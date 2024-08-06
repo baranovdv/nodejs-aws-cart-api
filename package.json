@@ -14,7 +14,12 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "docker:build": "docker build -t cart .",
-    "docker:start": "docker run --rm -p 4000:4000 --env-file .env cart"
+    "docker:start": "docker run --rm -p 4000:4000 --env-file .env cart",
+    "eb:init": "eb init baranovdv-cart-api",
+    "eb:create": "eb create development --single --cname baranovdv-cart-api-dev",
+    "eb:deploy": "eb deploy development",
+    "eb:destroy": "eb terminate --all"
+
   },
   "dependencies": {
     "@codegenie/serverless-express": "^4.14.1",
